@@ -3377,7 +3377,6 @@
 
         const ADMIN_USERS = [
             "wenbo___",
-            "is_ware",
             "TerryGao-FireFly",
             "王彦锦",
             "7.4班主任",
@@ -4519,9 +4518,8 @@
                         const id = parseInt(btn.dataset.id);
                         const file = allFiles.find(f => f.id === id);
                         if (file && file.file_path) {
-                            window.open(
-                                `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${file.file_path}`,
-                            '_blank');
+                            const downloadUrl = `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${file.file_path}?download=${encodeURIComponent(file.file_name)}`;
+                            window.open(downloadUrl, '_blank');
                             showToast(`📥 下载: ${file.file_name}`, 'info', 1500);
                         }
                     });

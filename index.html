@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>7.4班资源站</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <!-- Showdown JS 库（用于 Markdown 渲染） -->
+    <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
     <style>
         /* ========== CSS 变量与重置 ========== */
         * {
@@ -1054,7 +1056,6 @@
             font-size: 14px;
             color: var(--text-secondary);
             line-height: 1.6;
-            white-space: pre-wrap;
             word-break: break-word;
         }
 
@@ -3377,9 +3378,9 @@
 
         const ADMIN_USERS = [
             "wenbo___",
-            "is_ware",
             "TerryGao-FireFly",
             "王彦锦",
+            "is_ware",
             "7.4班主任",
             "陈韵如",
             "高正懿",
@@ -3402,6 +3403,32 @@
             if (isTeacher(username)) return 'teacher';
             if (isAdmin(username)) return 'admin';
             return 'user';
+        }
+
+        // ========================================================================
+        //  【Showdown Markdown 渲染器（全局）】
+        // ========================================================================
+        // 检查 showdown 是否已加载
+        if (typeof showdown !== 'undefined') {
+            const converter = new showdown.Converter({
+                tables: true,
+                tasklists: true,
+                strikethrough: true,
+                emoji: true,
+                openLinksInNewWindow: true
+            });
+
+            /**
+             * 将 Markdown 转为 HTML（安全，防 XSS）
+             */
+            window.renderMarkdown = function(text) {
+                if (!text) return '';
+                return converter.makeHtml(text);
+            };
+        } else {
+            // 如果未加载，提供一个空函数，避免报错
+            window.renderMarkdown = function(text) { return text; };
+            console.warn('Showdown 未加载，Markdown 渲染被禁用');
         }
 
         // ========================================================================
@@ -4769,7 +4796,7 @@
                                         ${reply.author} ${replyTag}
                                         <span class="reply-time">${formatTime(reply.created_at)}</span>
                                     </div>
-                                    <div class="reply-content">${escapeHtml(reply.content)}</div>
+                                    <div class="reply-content">${renderMarkdown(reply.content)}</div>
                                     <div class="reply-actions">
                                         ${canDeleteReply ? `<button class="delete-reply-btn" data-post-id="${post.id}" data-reply-id="${reply.id}">删除</button>` : ''}
                                         ${reportReplyBtn}
@@ -4804,7 +4831,7 @@
                                 <span class="post-time">${formatTime(post.created_at)}</span>
                             </div>
                             <div class="post-title">${escapeHtml(post.title)}</div>
-                            <div class="post-content">${escapeHtml(post.content)}</div>
+                            <div class="post-content">${renderMarkdown(post.content)}</div>
                             <div class="post-actions">
                                 ${currentUser && !currentUserBanned ? `<button class="reply-btn" data-post-id="${post.id}"><i class="fas fa-reply"></i> 回复</button>` : ''}
                                 ${canDeletePost ? `<button class="delete-post-btn" data-id="${post.id}"><i class="fas fa-trash"></i> 删除</button>` : ''}
@@ -5781,7 +5808,7 @@
                 }
             });
 
-            console.log('✅ 7.4班资源站已启动！（解禁+老师身份版）');
+            console.log('✅ 7.4班资源站已启动！');
             console.log(`👤 当前用户: ${getCurrentUser() || '未登录'}`);
             console.log(`👑 站长: ${OWNER_USER}`);
             console.log(`🏛️ 官方账号: ${OFFICIAL_USERS.join(', ')}`);
